@@ -3,7 +3,7 @@
 
 #include <QGLWidget>
 
-class QtLogo;
+class QTimer;
 
 class OGLWidget : public QGLWidget
 {
@@ -23,10 +23,8 @@ protected:
     void resizeGL(int width, int height);
 
 private:
-    QPoint lastPos;
-    QColor qtGreen;
-    QColor qtPurple;
-    GLfloat     rtri;
+    QTimer *refreshTimer_;
+    GLfloat rotValue_;
 
 };
 

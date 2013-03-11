@@ -6,42 +6,51 @@
 OGLWidget::OGLWidget(QWidget *parent) :
     QGLWidget(parent)
 {
-     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
-     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
-     rtri = 0;
- }
+    rotValue_ = 0;
+}
 
- OGLWidget::~OGLWidget()
- {
- }
+OGLWidget::~OGLWidget()
+{
+}
 
- void OGLWidget::initializeGL()
- {
+void OGLWidget::initializeGL()
+{
+    // set smoothing
+    //glShadeModel(GL_SMOOTH);
 
-glShadeModel(GL_SMOOTH);
-glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-glClearDepth(1.0f);                         // Depth Buffer Setup
-glEnable(GL_DEPTH_TEST);                        // Enables Depth Testing
-glDepthFunc(GL_LEQUAL);                         // The Type Of Depth Test To Do
-glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    // clear a black background
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    QTimer *timer = new QTimer(this);
-     connect(timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-     timer->start(20);
- }
+    // clear the depth buffer
+    //glClearDepth(1.0f);
 
- void OGLWidget::resizeGL(int width, int height)
- {
-      glViewport(0, 0, width, height);                    // Reset The Current Viewport
-      glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
-          glLoadIdentity();                           // Reset The Projection Matrix
+    // enable depth testing - required to stop back faces showing through (back face culling)
+    glEnable(GL_DEPTH_TEST);
 
-          // Calculate The Aspect Ratio Of The Window
-          gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,100.0f);
+    // set the type of depth function
+    //glDepthFunc(GL_LEQUAL);
 
-          glMatrixMode(GL_MODELVIEW);                     // Select The Modelview Matrix
-          glLoadIdentity();
- }
+    // setup the 'nice' perspective
+    //glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+    // set up the timer for a 50Hz view and connect to the update routine
+    refreshTimer_ = new QTimer(this);
+    connect(refreshTimer_, SIGNAL(timeout()), this, SLOT(updateGL()));
+    refreshTimer_->start(20);
+}
+
+void OGLWidget::resizeGL(int width, int height)
+{
+    glViewport(0, 0, width, height);                    // Reset The Current Viewport
+    glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
+    glLoadIdentity();                           // Reset The Projection Matrix
+
+    // Calculate The Aspect Ratio Of The Window
+    gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,100.0f);
+
+    glMatrixMode(GL_MODELVIEW);                     // Select The Modelview Matrix
+    glLoadIdentity();
+}
 
 
 
@@ -51,7 +60,7 @@ glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
      glLoadIdentity();                   // Reset The View
      glTranslatef(-1.5f,0.0f,-6.0f);             // Move Left And Into The Screen
 
-     glRotatef(rtri,0.0f,1.0f,0.0f);             // Rotate The Pyramid On It's Y Axis
+     glRotatef(rotValue_,0.0f,1.0f,0.0f);             // Rotate The Pyramid On It's Y Axis
 
      glBegin(GL_TRIANGLES);
 
@@ -83,9 +92,7 @@ glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
      glColor3f(0.0f,1.0f,0.0f);          // Green
      glVertex3f(-1.0f,-1.0f, 1.0f);          // Right Of Triangle (Left)
  glEnd();                        // Done Drawing The Pyramid
- rtri+=0.2f;
-
- qDebug() << rtri;
+ rotValue_+=0.2f;
  }
 
 
