@@ -41,77 +41,87 @@ void OGLWidget::initializeGL()
 
 void OGLWidget::resizeGL(int width, int height)
 {
-    glViewport(0, 0, width, height);                    // Reset The Current Viewport
-    glMatrixMode(GL_PROJECTION);                        // Select The Projection Matrix
-    glLoadIdentity();                           // Reset The Projection Matrix
+    // Set the viewport given the resize event
+    glViewport(0, 0, width, height);
 
-    // Calculate The Aspect Ratio Of The Window
+    // Reset the Projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    // Calculate The Aspect Ratio Of The Window and set the perspective
     gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,100.0f);
 
-    glMatrixMode(GL_MODELVIEW);                     // Select The Modelview Matrix
+    // Reset the Model View matrix
+    glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
 
+void OGLWidget::paintGL()
+{
+    // cler the screen and depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // reset the view to the identity
+    glLoadIdentity();
+
+    // move into the screen
+    glTranslatef(0.0f, 0.0f, -6.0f);
+
+    // rotate the cube by the rotation value
+    glRotatef(rotValue_, 0.0f, 1.0f, 0.0f);
+
+    // construct the cube
+    glBegin(GL_QUADS);
+
+    glColor3f(   1.0,  1.0, 1.0 );
+    glVertex3f(  0.5, -0.5, 0.5 );
+    glVertex3f(  0.5,  0.5, 0.5 );
+    glVertex3f( -0.5,  0.5, 0.5 );
+    glVertex3f( -0.5, -0.5, 0.5 );
+
+    glColor3f(  1.0,  0.0,  1.0 );
+    glVertex3f( 0.5, -0.5, -0.5 );
+    glVertex3f( 0.5,  0.5, -0.5 );
+    glVertex3f( 0.5,  0.5,  0.5 );
+    glVertex3f( 0.5, -0.5,  0.5 );
+
+    glColor3f(   0.0,  1.0,  0.0 );
+    glVertex3f( -0.5, -0.5,  0.5 );
+    glVertex3f( -0.5,  0.5,  0.5 );
+    glVertex3f( -0.5,  0.5, -0.5 );
+    glVertex3f( -0.5, -0.5, -0.5 );
+
+    glColor3f(   0.0,  0.0,  1.0 );
+    glVertex3f(  0.5,  0.5,  0.5 );
+    glVertex3f(  0.5,  0.5, -0.5 );
+    glVertex3f( -0.5,  0.5, -0.5 );
+    glVertex3f( -0.5,  0.5,  0.5 );
+
+    glColor3f(   1.0,  0.0,  0.0 );
+    glVertex3f(  0.5, -0.5, -0.5 );
+    glVertex3f(  0.5, -0.5,  0.5 );
+    glVertex3f( -0.5, -0.5,  0.5 );
+    glVertex3f( -0.5, -0.5, -0.5 );
+
+    glColor3f(   1.0,  1.0, 0.0 );
+    glVertex3f(  0.5, -0.5, -0.5 );
+    glVertex3f(  0.5,  0.5, -0.5 );
+    glVertex3f( -0.5,  0.5, -0.5 );
+    glVertex3f( -0.5, -0.5, -0.5 );
+
+    glEnd();
+
+    // finally, update the rotation
+    rotValue_ += 0.2f;
+}
 
 
- void OGLWidget::paintGL()
- {
-     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear The Screen And The Depth Buffer
-     glLoadIdentity();                   // Reset The View
-     glTranslatef(-1.5f,0.0f,-6.0f);             // Move Left And Into The Screen
+void OGLWidget::mousePressEvent(QMouseEvent *event)
+{
+    // trigger on mouse press
+}
 
-     glRotatef(rotValue_,0.0f,1.0f,0.0f);             // Rotate The Pyramid On It's Y Axis
-
-     glBegin(GL_TRIANGLES);
-
-     glColor3f(1.0f,0.0f,0.0f);          // Red
-     glVertex3f( 0.0f, 1.0f, 0.0f);          // Top Of Triangle (Front)
-     glColor3f(0.0f,1.0f,0.0f);          // Green
-     glVertex3f(-1.0f,-1.0f, 1.0f);          // Left Of Triangle (Front)
-     glColor3f(0.0f,0.0f,1.0f);          // Blue
-     glVertex3f( 1.0f,-1.0f, 1.0f);          // Right Of Triangle (Front)
-
-     glColor3f(1.0f,0.0f,0.0f);          // Red
-     glVertex3f( 0.0f, 1.0f, 0.0f);          // Top Of Triangle (Right)
-     glColor3f(0.0f,0.0f,1.0f);          // Blue
-     glVertex3f( 1.0f,-1.0f, 1.0f);          // Left Of Triangle (Right)
-     glColor3f(0.0f,1.0f,0.0f);          // Green
-     glVertex3f( 1.0f,-1.0f, -1.0f);         // Right Of Triangle (Right)
-
-     glColor3f(1.0f,0.0f,0.0f);          // Red
-     glVertex3f( 0.0f, 1.0f, 0.0f);          // Top Of Triangle (Back)
-     glColor3f(0.0f,1.0f,0.0f);          // Green
-     glVertex3f( 1.0f,-1.0f, -1.0f);         // Left Of Triangle (Back)
-     glColor3f(0.0f,0.0f,1.0f);          // Blue
-     glVertex3f(-1.0f,-1.0f, -1.0f);         // Right Of Triangle (Back)
-
-     glColor3f(1.0f,0.0f,0.0f);          // Red
-     glVertex3f( 0.0f, 1.0f, 0.0f);          // Top Of Triangle (Left)
-     glColor3f(0.0f,0.0f,1.0f);          // Blue
-     glVertex3f(-1.0f,-1.0f,-1.0f);          // Left Of Triangle (Left)
-     glColor3f(0.0f,1.0f,0.0f);          // Green
-     glVertex3f(-1.0f,-1.0f, 1.0f);          // Right Of Triangle (Left)
- glEnd();                        // Done Drawing The Pyramid
- rotValue_+=0.2f;
- }
-
-
- void OGLWidget::mousePressEvent(QMouseEvent *event)
- {
- //    lastPos = event->pos();
- }
-
- void OGLWidget::mouseMoveEvent(QMouseEvent *event)
- {
-   /*  int dx = event->x() - lastPos.x();
-     int dy = event->y() - lastPos.y();
-
-     if (event->buttons() & Qt::LeftButton) {
-         setXRotation(xRot + 8 * dy);
-         setYRotation(yRot + 8 * dx);
-     } else if (event->buttons() & Qt::RightButton) {
-         setXRotation(xRot + 8 * dy);
-         setZRotation(zRot + 8 * dx);
-     }
-     lastPos = event->pos();*/
- }
+void OGLWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    // trigger on mouse move
+}
