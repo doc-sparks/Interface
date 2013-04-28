@@ -2,11 +2,14 @@
 #include <GL/glu.h>
 #include <QDebug>
 #include <QTimer>
+#include <QMouseEvent>
 
 OGLWidget::OGLWidget(QWidget *parent) :
+    mouseLook_(false), rotValue_(0, 0),
     QGLWidget(parent)
 {
-    rotValue_ = 0;
+    // capture mouse tracking so we can get move events without a button down
+    setMouseTracking(true);
 }
 
 OGLWidget::~OGLWidget()
@@ -19,7 +22,7 @@ void OGLWidget::initializeGL()
     //glShadeModel(GL_SMOOTH);
 
     // clear a black background
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     // clear the depth buffer
     //glClearDepth(1.0f);
@@ -68,7 +71,8 @@ void OGLWidget::paintGL()
     glTranslatef(0.0f, 0.0f, -6.0f);
 
     // rotate the cube by the rotation value
-    glRotatef(rotValue_, 0.0f, 1.0f, 0.0f);
+    glRotatef(rotValue_.y(), 1.0f, 0.0f, 0.0f);
+    glRotatef(rotValue_.x(), 0.0f, 1.0f, 0.0f);
 
     // construct the cube
     glBegin(GL_QUADS);
@@ -110,18 +114,29 @@ void OGLWidget::paintGL()
     glVertex3f( -0.5, -0.5, -0.5 );
 
     glEnd();
-
-    // finally, update the rotation
-    rotValue_ += 0.2f;
-}
-
-
-void OGLWidget::mousePressEvent(QMouseEvent *event)
-{
-    // trigger on mouse press
 }
 
 void OGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    // trigger on mouse move
+    // is the middle mouse button down?
+    if (event->buttons() == Qt::MidButton)
+    {
+        // was it already down? If not, store the current coords
+        if (!mouseLook_)
+        {
+            tmpMousePos_ = event->pos();
+            tmpRotValue_ = rotValue_;
+            mouseLook_ = true;
+        }
+
+        // update the rotation values depending on the relative mouse position
+        rotValue_.setX( tmpRotValue_.x() + (tmpMousePos_.x() - event->pos().x()) * 0.2 );
+        rotValue_.setY( tmpRotValue_.y() + (tmpMousePos_.y() - event->pos().y()) * -0.2 );
+    }
+    else
+    {
+        // turn off mouse look
+        mouseLook_ = false;
+    }
+
 }

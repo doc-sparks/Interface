@@ -18,13 +18,23 @@ protected:
     void initializeGL();
     void paintGL();
 
-    void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void resizeGL(int width, int height);
 
 private:
+
+    // timer
     QTimer *refreshTimer_;
-    GLfloat rotValue_;
+
+    // current rotation value
+    QPointF rotValue_;
+
+    // temporary variables for mouselook
+    QPoint tmpMousePos_;
+    QPointF tmpRotValue_;
+
+    // is mouse look enabled?
+    bool mouseLook_;
 
 };
 
