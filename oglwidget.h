@@ -4,24 +4,28 @@
 #include <QGLWidget>
 
 class QTimer;
+class MainWindow;
 
 class OGLWidget : public QGLWidget
 {
     Q_OBJECT
 
 public:
-    OGLWidget(QWidget *parent = 0);
+    OGLWidget(MainWindow *win, QWidget *parent = 0);
     ~OGLWidget();
-
 
 protected:
     void initializeGL();
     void paintGL();
 
-    void mouseMoveEvent(QMouseEvent *event);
-    void resizeGL(int width, int height);
+    void wheelEvent(QWheelEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);    
+    void resizeGL(int width, int height);    
 
 private:
+
+    // parent window
+    MainWindow *parentWin_;
 
     // timer
     QTimer *refreshTimer_;
@@ -29,13 +33,21 @@ private:
     // current rotation value
     QPointF rotValue_;
 
+    // current camera centred position
+    QPointF posValue_;
+
+    // current camera zoom value
+    double zoomValue_;
+
     // temporary variables for mouselook
     QPoint tmpMousePos_;
     QPointF tmpRotValue_;
 
     // is mouse look enabled?
-    bool mouseLook_;
+    bool mouseLook_;    
 
+protected slots:
+    void mainLoop();
 };
 
 #endif // OGLWIDGET_H

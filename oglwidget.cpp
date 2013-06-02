@@ -3,13 +3,16 @@
 #include <QDebug>
 #include <QTimer>
 #include <QMouseEvent>
+#include "mainwindow.h"
+#include <math.h>
 
-OGLWidget::OGLWidget(QWidget *parent) :
-    mouseLook_(false), rotValue_(0, 0),
-    QGLWidget(parent)
+#define PI 3.14159265
+
+OGLWidget::OGLWidget(MainWindow *win, QWidget *parent) : QGLWidget(parent),
+    parentWin_(win), rotValue_(0, 0), posValue_(0, 0), zoomValue_(6.0), mouseLook_(false)
 {
     // capture mouse tracking so we can get move events without a button down
-    setMouseTracking(true);
+    setMouseTracking(true);    
 }
 
 OGLWidget::~OGLWidget()
@@ -38,8 +41,41 @@ void OGLWidget::initializeGL()
 
     // set up the timer for a 50Hz view and connect to the update routine
     refreshTimer_ = new QTimer(this);
-    connect(refreshTimer_, SIGNAL(timeout()), this, SLOT(updateGL()));
+    connect(refreshTimer_, SIGNAL(timeout()), this, SLOT(mainLoop()));
     refreshTimer_->start(20);
+}
+
+void OGLWidget::mainLoop()
+{
+    // a main loop to do any housekeeping every update
+
+    // check for keyboard movement
+    if (parentWin_->isKeyDown(65))  // A
+    {
+        posValue_.setY( posValue_.y() + (0.05 * sin( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setX( posValue_.x() + (0.05 * cos( PI * rotValue_.x() / 180.0) ) );
+    }
+
+    if (parentWin_->isKeyDown(68))  // D
+    {
+        posValue_.setY( posValue_.y() - (0.05 * sin( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setX( posValue_.x() - (0.05 * cos( PI * rotValue_.x() / 180.0) ) );
+    }
+
+    if (parentWin_->isKeyDown(87)) // W
+    {
+        posValue_.setY( posValue_.y() + (0.05 * cos( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setX( posValue_.x() - (0.05 * sin( PI * rotValue_.x() / 180.0) ) );
+    }
+
+    if (parentWin_->isKeyDown(83))  // S
+    {
+        posValue_.setY( posValue_.y() - (0.05 * cos( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setX( posValue_.x() + (0.05 * sin( PI * rotValue_.x() / 180.0) ) );
+    }
+
+    // update the widget display
+    updateGL();
 }
 
 void OGLWidget::resizeGL(int width, int height)
@@ -52,11 +88,11 @@ void OGLWidget::resizeGL(int width, int height)
     glLoadIdentity();
 
     // Calculate The Aspect Ratio Of The Window and set the perspective
-    gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,100.0f);
+    gluPerspective(45.0f, (GLfloat)width/(GLfloat)height, 0.1f, 100.0f );
 
     // Reset the Model View matrix
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    glLoadIdentity();    
 }
 
 void OGLWidget::paintGL()
@@ -64,15 +100,27 @@ void OGLWidget::paintGL()
     // cler the screen and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // --------------------------------------------------
+    // set up the camera view
+
     // reset the view to the identity
     glLoadIdentity();
 
-    // move into the screen
-    glTranslatef(0.0f, 0.0f, -6.0f);
+    // move everything back by the zoom factor
+    glTranslatef(0.0f, 0.0f, -zoomValue_);
 
-    // rotate the cube by the rotation value
+    // rotate everything
     glRotatef(rotValue_.y(), 1.0f, 0.0f, 0.0f);
     glRotatef(rotValue_.x(), 0.0f, 1.0f, 0.0f);
+
+    // finally offset by the current viewing point
+    glTranslatef(posValue_.x(), 0.0f, posValue_.y());
+
+    // --------------------------------------------------
+    // Now draw each object and the apporpriate positions
+
+    // store the camera-relative world position
+    glPushMatrix();
 
     // construct the cube
     glBegin(GL_QUADS);
@@ -114,6 +162,23 @@ void OGLWidget::paintGL()
     glVertex3f( -0.5, -0.5, -0.5 );
 
     glEnd();
+
+    // restore the world position after object draw
+    glPopMatrix();
+}
+
+void OGLWidget::wheelEvent(QWheelEvent *event)
+{
+    // zoom in and out with the mouse wheel
+    zoomValue_ -= event->delta() / 200.0;
+
+    // apply limits
+    if (zoomValue_ < 1.0)
+        zoomValue_ = 1.0;
+
+    if (zoomValue_ > 30.0)
+        zoomValue_ = 30.0;
+
 }
 
 void OGLWidget::mouseMoveEvent(QMouseEvent *event)
