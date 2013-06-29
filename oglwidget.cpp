@@ -3,13 +3,13 @@
 #include <QDebug>
 #include <QTimer>
 #include <QMouseEvent>
-#include "mainwindow.h"
+#include "interfacecoreview.h"
 #include <math.h>
 
 #define PI 3.14159265
 
-OGLWidget::OGLWidget(MainWindow *win, QWidget *parent) : QGLWidget(parent),
-    parentWin_(win), rotValue_(0, 0), posValue_(0, 0), zoomValue_(6.0), mouseLook_(false)
+OGLWidget::OGLWidget(InterfaceCoreView *view, QWidget *parent) : QGLWidget(parent),
+    parentView_(view), rotValue_(0, 0), posValue_(0, 0), zoomValue_(6.0), mouseLook_(false)
 {
     // capture mouse tracking so we can get move events without a button down
     setMouseTracking(true);    
@@ -39,6 +39,9 @@ void OGLWidget::initializeGL()
     // setup the 'nice' perspective
     //glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
+    // set up the display lists for the nodes
+    parentView_->createDisplayLists();
+
     // set up the timer for a 50Hz view and connect to the update routine
     refreshTimer_ = new QTimer(this);
     connect(refreshTimer_, SIGNAL(timeout()), this, SLOT(mainLoop()));
@@ -50,28 +53,28 @@ void OGLWidget::mainLoop()
     // a main loop to do any housekeeping every update
 
     // check for keyboard movement
-    if (parentWin_->isKeyDown(65))  // A
+    if (parentView_->isKeyDown(65))  // A
     {
-        posValue_.setY( posValue_.y() + (0.05 * sin( PI * rotValue_.x() / 180.0) ) );
-        posValue_.setX( posValue_.x() + (0.05 * cos( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setY( posValue_.y() + (0.15 * sin( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setX( posValue_.x() + (0.15 * cos( PI * rotValue_.x() / 180.0) ) );
     }
 
-    if (parentWin_->isKeyDown(68))  // D
+    if (parentView_->isKeyDown(68))  // D
     {
-        posValue_.setY( posValue_.y() - (0.05 * sin( PI * rotValue_.x() / 180.0) ) );
-        posValue_.setX( posValue_.x() - (0.05 * cos( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setY( posValue_.y() - (0.15 * sin( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setX( posValue_.x() - (0.15 * cos( PI * rotValue_.x() / 180.0) ) );
     }
 
-    if (parentWin_->isKeyDown(87)) // W
+    if (parentView_->isKeyDown(87)) // W
     {
-        posValue_.setY( posValue_.y() + (0.05 * cos( PI * rotValue_.x() / 180.0) ) );
-        posValue_.setX( posValue_.x() - (0.05 * sin( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setY( posValue_.y() + (0.15 * cos( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setX( posValue_.x() - (0.15 * sin( PI * rotValue_.x() / 180.0) ) );
     }
 
-    if (parentWin_->isKeyDown(83))  // S
+    if (parentView_->isKeyDown(83))  // S
     {
-        posValue_.setY( posValue_.y() - (0.05 * cos( PI * rotValue_.x() / 180.0) ) );
-        posValue_.setX( posValue_.x() + (0.05 * sin( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setY( posValue_.y() - (0.15 * cos( PI * rotValue_.x() / 180.0) ) );
+        posValue_.setX( posValue_.x() + (0.15 * sin( PI * rotValue_.x() / 180.0) ) );
     }
 
     // update the widget display
@@ -118,53 +121,7 @@ void OGLWidget::paintGL()
 
     // --------------------------------------------------
     // Now draw each object and the apporpriate positions
-
-    // store the camera-relative world position
-    glPushMatrix();
-
-    // construct the cube
-    glBegin(GL_QUADS);
-
-    glColor3f(   1.0,  1.0, 1.0 );
-    glVertex3f(  0.5, -0.5, 0.5 );
-    glVertex3f(  0.5,  0.5, 0.5 );
-    glVertex3f( -0.5,  0.5, 0.5 );
-    glVertex3f( -0.5, -0.5, 0.5 );
-
-    glColor3f(  1.0,  0.0,  1.0 );
-    glVertex3f( 0.5, -0.5, -0.5 );
-    glVertex3f( 0.5,  0.5, -0.5 );
-    glVertex3f( 0.5,  0.5,  0.5 );
-    glVertex3f( 0.5, -0.5,  0.5 );
-
-    glColor3f(   0.0,  1.0,  0.0 );
-    glVertex3f( -0.5, -0.5,  0.5 );
-    glVertex3f( -0.5,  0.5,  0.5 );
-    glVertex3f( -0.5,  0.5, -0.5 );
-    glVertex3f( -0.5, -0.5, -0.5 );
-
-    glColor3f(   0.0,  0.0,  1.0 );
-    glVertex3f(  0.5,  0.5,  0.5 );
-    glVertex3f(  0.5,  0.5, -0.5 );
-    glVertex3f( -0.5,  0.5, -0.5 );
-    glVertex3f( -0.5,  0.5,  0.5 );
-
-    glColor3f(   1.0,  0.0,  0.0 );
-    glVertex3f(  0.5, -0.5, -0.5 );
-    glVertex3f(  0.5, -0.5,  0.5 );
-    glVertex3f( -0.5, -0.5,  0.5 );
-    glVertex3f( -0.5, -0.5, -0.5 );
-
-    glColor3f(   1.0,  1.0, 0.0 );
-    glVertex3f(  0.5, -0.5, -0.5 );
-    glVertex3f(  0.5,  0.5, -0.5 );
-    glVertex3f( -0.5,  0.5, -0.5 );
-    glVertex3f( -0.5, -0.5, -0.5 );
-
-    glEnd();
-
-    // restore the world position after object draw
-    glPopMatrix();
+    parentView_->drawNodes();
 }
 
 void OGLWidget::wheelEvent(QWheelEvent *event)

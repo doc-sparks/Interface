@@ -4,14 +4,14 @@
 #include <QGLWidget>
 
 class QTimer;
-class MainWindow;
+class InterfaceCoreView;
 
 class OGLWidget : public QGLWidget
 {
     Q_OBJECT
 
 public:
-    OGLWidget(MainWindow *win, QWidget *parent = 0);
+    OGLWidget(InterfaceCoreView *view, QWidget *parent = 0);
     ~OGLWidget();
 
 protected:
@@ -25,7 +25,7 @@ protected:
 private:
 
     // parent window
-    MainWindow *parentWin_;
+    InterfaceCoreView *parentView_;
 
     // timer
     QTimer *refreshTimer_;

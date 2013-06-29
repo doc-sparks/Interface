@@ -12,10 +12,15 @@ TEMPLATE = app
 LIBS += -lGLU
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    oglwidget.cpp
+    oglwidget.cpp \
+    processnode.cpp \
+    interfacecoreapp.cpp \
+    interfacecoreview.cpp
 
-HEADERS  += mainwindow.h \
-    oglwidget.h
+HEADERS  += \
+    oglwidget.h \
+    processnode.h \
+    interfacecoreapp.h \
+    interfacecoreview.h
 
 FORMS    +=

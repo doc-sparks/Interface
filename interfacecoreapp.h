@@ -15,6 +15,8 @@ public:
     explicit InterfaceCoreApp(int & argc, char ** argv);
     
     void addNode( ProcessNode *node );
+    int getProcessNodeCount();
+    ProcessNode *getProcessNode( int i );
 
 signals:
     
