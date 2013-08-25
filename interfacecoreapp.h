@@ -10,6 +10,7 @@ class InterfaceCoreApp : public QApplication
 
 private:
     QList<ProcessNode*> processNodes_;
+    int tickCount_;
 
 public:
     explicit InterfaceCoreApp(int & argc, char ** argv);
@@ -17,6 +18,8 @@ public:
     void addNode( ProcessNode *node );
     int getProcessNodeCount();
     ProcessNode *getProcessNode( int i );
+    void processTick();
+    void initialiseNodes();
 
 signals:
     

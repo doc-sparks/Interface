@@ -15,12 +15,24 @@ SOURCES += main.cpp\
     oglwidget.cpp \
     processnode.cpp \
     interfacecoreapp.cpp \
-    interfacecoreview.cpp
+    interfacecoreview.cpp \
+    constantnode.cpp \
+    stdoutnode.cpp \
+    dataport.cpp \
+    inputdataport.cpp \
+    outputdataport.cpp \
+    datavalue.cpp
 
 HEADERS  += \
     oglwidget.h \
     processnode.h \
     interfacecoreapp.h \
-    interfacecoreview.h
+    interfacecoreview.h \
+    constantnode.h \
+    stdoutnode.h \
+    dataport.h \
+    inputdataport.h \
+    outputdataport.h \
+    datavalue.h
 
 FORMS    +=

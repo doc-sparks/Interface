@@ -7,7 +7,7 @@ InterfaceCoreView::InterfaceCoreView(InterfaceCoreApp *app, QWidget *parent) :
     app_(app)
 {
     // Show the interface fullscreen
-    showFullScreen();
+    //showFullScreen();
 
     // create and add the openGL Widget
     OGLWidget *w = new OGLWidget(this);
@@ -25,6 +25,13 @@ void InterfaceCoreView::keyPressEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_Escape)
     {
         close();
+        return;
+    }
+
+    // check for program step
+    if (e->key() == Qt::Key_Space)
+    {
+        app_->processTick();
         return;
     }
 
@@ -51,7 +58,7 @@ void InterfaceCoreView::createDisplayLists()
 {
     // create an array of all the nodes
     QList<ProcessNode*> all_nodes;
-    all_nodes.append( new ProcessNode( QVector3D(0, 0, 0) ) );
+    all_nodes.append( new ProcessNode( QVector3D(0, 0, 0), "TestNode1" ) );
 
     // reserve the number of display lists
     GLuint display_lists = glGenLists(all_nodes.count());
