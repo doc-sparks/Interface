@@ -16,6 +16,30 @@ ProcessNode::ProcessNode(QVector3D vec, QString name, QObject *parent) :
 
 }
 
+void ProcessNode::clearInputPorts()
+{
+    // delete all the input ports connected - TODO: check for other uses - BAD POINTERS AHOY!
+    for (int i = 0; i < inputPorts_.count(); i++)
+    {
+        delete inputPorts_[i];
+    }
+
+    inputPorts_.clear();
+
+}
+
+void ProcessNode::clearOutputPorts()
+{
+    // delete all the input ports connected - TODO: check for other uses - BAD POINTERS AHOY!
+    for (int i = 0; i < outputPorts_.count(); i++)
+    {
+        delete outputPorts_[i];
+    }
+
+    outputPorts_.clear();
+
+}
+
 QString ProcessNode::getNodeType()
 {
     return nodeType_;
@@ -91,41 +115,41 @@ void ProcessNode::draw()
     // a basic cube for a basic node
     glBegin(GL_QUADS);
 
-    glColor3f(   1.0,  1.0, 1.0 );
+    glNormal3d(0, 0, 1);
     glVertex3f(  0.5, -0.5, 0.5 );
     glVertex3f(  0.5,  0.5, 0.5 );
     glVertex3f( -0.5,  0.5, 0.5 );
     glVertex3f( -0.5, -0.5, 0.5 );
 
-    glColor3f(  1.0,  0.0,  1.0 );
+    glNormal3d(1, 0, 0);
     glVertex3f( 0.5, -0.5, -0.5 );
     glVertex3f( 0.5,  0.5, -0.5 );
     glVertex3f( 0.5,  0.5,  0.5 );
     glVertex3f( 0.5, -0.5,  0.5 );
 
-    glColor3f(   0.0,  1.0,  0.0 );
+    glNormal3d(-1, 0, 0);
     glVertex3f( -0.5, -0.5,  0.5 );
     glVertex3f( -0.5,  0.5,  0.5 );
     glVertex3f( -0.5,  0.5, -0.5 );
     glVertex3f( -0.5, -0.5, -0.5 );
 
-    glColor3f(   0.0,  0.0,  1.0 );
+    glNormal3d(0, 1, 0);
     glVertex3f(  0.5,  0.5,  0.5 );
     glVertex3f(  0.5,  0.5, -0.5 );
     glVertex3f( -0.5,  0.5, -0.5 );
     glVertex3f( -0.5,  0.5,  0.5 );
 
-    glColor3f(   1.0,  0.0,  0.0 );
+    glNormal3d(0, -1, 0);
     glVertex3f(  0.5, -0.5, -0.5 );
     glVertex3f(  0.5, -0.5,  0.5 );
     glVertex3f( -0.5, -0.5,  0.5 );
     glVertex3f( -0.5, -0.5, -0.5 );
 
-    glColor3f(   1.0,  1.0, 0.0 );
-    glVertex3f(  0.5, -0.5, -0.5 );
-    glVertex3f(  0.5,  0.5, -0.5 );
-    glVertex3f( -0.5,  0.5, -0.5 );
-    glVertex3f( -0.5, -0.5, -0.5 );
+    glNormal3d(0, 0, -1);
+    glVertex3f(  -0.5, -0.5, -0.5 );
+    glVertex3f(  -0.5,  0.5, -0.5 );
+    glVertex3f( 0.5,  0.5, -0.5 );
+    glVertex3f( 0.5, -0.5, -0.5 );
 
     glEnd();
 }

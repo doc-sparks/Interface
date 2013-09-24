@@ -2,6 +2,9 @@
 #include "interfacecoreview.h"
 #include "interfacecoreapp.h"
 #include "constantnode.h"
+#include "mergernode.h"
+#include "splitternode.h"
+#include "additionnode.h"
 #include "stdoutnode.h"
 #include "inputdataport.h"
 #include "outputdataport.h"
@@ -22,8 +25,8 @@ int main(int argc, char *argv[])
     c1->setConstValue( DataValue(1) );
 
     MergerNode *m = new MergerNode( QVector3D(-3, 0, 0), "MergerNode" );
-    m.addNode( c1 );
-    m->setOutputMode(MergerNode::Mode::Priority);  // set the merger on port priority, not last push
+    a.addNode( m );
+    m->setOutputMode(MergerNode::Priority);  // set the merger on port priority, not last push
     m->setNumInputs(2);
 
     DataPort::connect(c1->getOutput(0), m->getInput(1));
@@ -37,7 +40,7 @@ int main(int argc, char *argv[])
     DataPort::connect(m->getOutput(0), d->getInput(0));
     DataPort::connect(c2->getOutput(0), d->getInput(1));
 
-    SplitterNode *s = new SplitterNode( QVector3D(3, 0, 0), "SplitterNode" );
+    SplitterNode *s = new SplitterNode( QVector3D(3, 2, 0), "SplitterNode" );
     a.addNode( s );
     s->setNumOutputs(2);
     DataPort::connect(d->getOutput(0), s->getInput(0));

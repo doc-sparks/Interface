@@ -24,6 +24,7 @@ public:
     // node drawing routines
     void createDisplayLists();
     void drawNodes();
+    void drawConnections();
     GLuint getDisplayList( QString node );
 
 private:

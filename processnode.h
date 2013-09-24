@@ -61,6 +61,8 @@ public:
     // port functions
     void addOutputPort( OutputDataPort *d ) { outputPorts_.append(d); }
     void addInputPort( InputDataPort *d ) { inputPorts_.append(d); }
+    void clearInputPorts();
+    void clearOutputPorts();
 
     // get/set functions
     QVector3D getPos() { return pos_; }
@@ -68,6 +70,8 @@ public:
     OutputDataPort *getOutput( int i );
     void setStatus(NodeStatus s);
     NodeStatus getStatus() { return status_; }
+    int getNumInputPorts() { return inputPorts_.count(); }
+    int getNumOutputPorts() { return outputPorts_.count(); }
 
     // processing
     virtual void process();

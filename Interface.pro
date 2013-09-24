@@ -21,7 +21,10 @@ SOURCES += main.cpp\
     dataport.cpp \
     inputdataport.cpp \
     outputdataport.cpp \
-    datavalue.cpp
+    datavalue.cpp \
+    mergernode.cpp \
+    additionnode.cpp \
+    splitternode.cpp
 
 HEADERS  += \
     oglwidget.h \
@@ -33,6 +36,9 @@ HEADERS  += \
     dataport.h \
     inputdataport.h \
     outputdataport.h \
-    datavalue.h
+    datavalue.h \
+    mergernode.h \
+    additionnode.h \
+    splitternode.h
 
 FORMS    +=

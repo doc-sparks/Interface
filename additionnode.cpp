@@ -19,7 +19,6 @@ void AdditionNode::process()
     if ((getInput(0)->getOutputPort()->getParentNode()->getStatus() == Ready) &&
         (getInput(1)->getOutputPort()->getParentNode()->getStatus() == Ready))
     {
-        qDebug() << getInput(0)->getValue().getDouble() << "  " << getInput(1)->getValue().getDouble() ;
         // perform addition
         getOutput(0)->setValue( getInput(0)->getValue().getDouble() + getInput(1)->getValue().getDouble() );
 

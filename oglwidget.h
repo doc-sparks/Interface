@@ -16,7 +16,10 @@ public:
 
 protected:
     void initializeGL();
-    void paintGL();
+    //void paintGL();  // use paintEvent instead
+    void paintEvent(QPaintEvent *);
+    void paint3D();
+    void paint2D();
 
     void wheelEvent(QWheelEvent *event);
     void mouseMoveEvent(QMouseEvent *event);    

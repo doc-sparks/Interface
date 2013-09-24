@@ -1,13 +1,20 @@
 #include "interfacecoreview.h"
 #include "oglwidget.h"
 #include "QKeyEvent"
+#include "additionnode.h"
+#include "constantnode.h"
+#include "splitternode.h"
+#include "stdoutnode.h"
+#include "mergernode.h"
+#include "stdoutnode.h"
+#include "inputdataport.h"
 
 InterfaceCoreView::InterfaceCoreView(InterfaceCoreApp *app, QWidget *parent) :
     QMainWindow(parent),
     app_(app)
 {
     // Show the interface fullscreen
-    //showFullScreen();
+    showFullScreen();
 
     // create and add the openGL Widget
     OGLWidget *w = new OGLWidget(this);
@@ -59,6 +66,11 @@ void InterfaceCoreView::createDisplayLists()
     // create an array of all the nodes
     QList<ProcessNode*> all_nodes;
     all_nodes.append( new ProcessNode( QVector3D(0, 0, 0), "TestNode1" ) );
+    all_nodes.append( new AdditionNode( QVector3D(0, 0, 0), "TestNode2" ) );
+    all_nodes.append( new ConstantNode( QVector3D(0, 0, 0), "TestNode3" ) );
+    all_nodes.append( new MergerNode( QVector3D(0, 0, 0), "TestNode4" ) );
+    all_nodes.append( new SplitterNode( QVector3D(0, 0, 0), "TestNode5" ) );
+    all_nodes.append( new StdOutNode( QVector3D(0, 0, 0), "TestNode6" ) );
 
     // reserve the number of display lists
     GLuint display_lists = glGenLists(all_nodes.count());
@@ -78,6 +90,12 @@ void InterfaceCoreView::createDisplayLists()
         // set it into the map
         displayListMap_[ all_nodes[i]->getNodeType() ] = display_lists + i;
     }
+
+    // delete the nodes
+    for (int i = 0; i < all_nodes.count(); i++ )
+    {
+        delete all_nodes[i];
+    }
 }
 
 void InterfaceCoreView::drawNodes()
@@ -92,8 +110,57 @@ void InterfaceCoreView::drawNodes()
         ProcessNode *n = app_->getProcessNode(i);
         glTranslatef( n->getPos().x(), n->getPos().y(), n->getPos().z() );
 
+        // set the colour depending on status
+        if (n->getStatus() == NotReady)
+        {
+            GLfloat red[] = {0.8f, .2f, .2f, 1.f};
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, red);
+        } else if (n->getStatus() == Ready)
+        {
+            GLfloat green[] = {0.2f, .8f, .2f, 1.f};
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, green);
+        }
+
         // draw the node
         glCallList(n->getDisplayList(this));
+
+        // restore the world position after object draw
+        glPopMatrix();
+    }
+}
+
+void InterfaceCoreView::drawConnections()
+{
+    // go through the node types and create the display lists
+    for (int i = 0; i < app_->getProcessNodeCount(); i++ )
+    {
+        // store the camera-relative world position
+        glPushMatrix();
+
+        // shift to primary node position
+        ProcessNode *n = app_->getProcessNode(i);
+        glTranslatef( n->getPos().x(), n->getPos().y(), n->getPos().z() );
+
+        // draw the connection for all outputs
+        for (int j = 0; j < n->getNumOutputPorts(); j++)
+        {
+            // is the output connected?
+            if (!n->getOutput(j)->getInputPort())
+                continue;
+
+            // yes - so draw the connection
+            ProcessNode *m = n->getOutput(j)->getInputPort()->getParentNode();
+
+            glBegin(GL_QUADS);
+
+            glColor3f(   1.0,  0.0, 0.0 );
+            glVertex3f(  0, -0.05, 0 );
+            glVertex3f(  0,  0.05, 0 );
+            glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() + 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
+            glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() - 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
+
+            glEnd();
+        }
 
         // restore the world position after object draw
         glPopMatrix();

@@ -13,6 +13,9 @@ OGLWidget::OGLWidget(InterfaceCoreView *view, QWidget *parent) : QGLWidget(paren
 {
     // capture mouse tracking so we can get move events without a button down
     setMouseTracking(true);    
+
+    // must not auto fill background if we're overpainting
+    setAutoFillBackground(false);
 }
 
 OGLWidget::~OGLWidget()
@@ -25,16 +28,19 @@ void OGLWidget::initializeGL()
     //glShadeModel(GL_SMOOTH);
 
     // clear a black background
-    //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     // clear the depth buffer
-    //glClearDepth(1.0f);
+    glClearDepth(1.0f);
 
     // enable depth testing - required to stop back faces showing through (back face culling)
-    glEnable(GL_DEPTH_TEST);
+
+    // Set up two diffuse lights
+
+    // enable the lighting
 
     // set the type of depth function
-    //glDepthFunc(GL_LEQUAL);
+    glDepthFunc(GL_LEQUAL);
 
     // setup the 'nice' perspective
     //glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -78,7 +84,7 @@ void OGLWidget::mainLoop()
     }
 
     // update the widget display
-    updateGL();
+    update();
 }
 
 void OGLWidget::resizeGL(int width, int height)
@@ -98,13 +104,42 @@ void OGLWidget::resizeGL(int width, int height)
     glLoadIdentity();    
 }
 
-void OGLWidget::paintGL()
+void OGLWidget::paintEvent(QPaintEvent *)
+{
+    // reset lighting as overpainting will mess this up
+    GLfloat white_light[]= { 1.0f, 1.0f, 1.0f, 1.0f };
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, white_light);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, white_light);
+
+    // enable everything again
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT2);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+
+    // paint the 3D
+    paint3D();
+
+    // paint the 2D
+    paint2D();
+}
+
+void OGLWidget::paint2D()
+{
+    QPainter painter(this);
+    painter.setPen(Qt::blue);
+    painter.setFont(QFont("Arial", 30));
+    painter.drawText(QRect(0, 0, 100, 40), Qt::AlignCenter, "Qt");
+}
+
+void OGLWidget::paint3D()
 {
     // cler the screen and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // --------------------------------------------------
-    // set up the camera view
+    // set up the camera view    
 
     // reset the view to the identity
     glLoadIdentity();
@@ -119,9 +154,20 @@ void OGLWidget::paintGL()
     // finally offset by the current viewing point
     glTranslatef(posValue_.x(), 0.0f, posValue_.y());
 
+    // set the light position
+    GLfloat light_pos1[]= { 1.0f, 1.0f, 3.0f, 0.0f };
+    glLightfv(GL_LIGHT1, GL_POSITION, light_pos1);
+    GLfloat light_pos2[]= { 1.0f, -1.0f, -3.0f, 0.0f };
+    glLightfv(GL_LIGHT2, GL_POSITION, light_pos2);
+
     // --------------------------------------------------
     // Now draw each object and the apporpriate positions
     parentView_->drawNodes();
+
+    // And now the data connections
+    parentView_->drawConnections();
+
+
 }
 
 void OGLWidget::wheelEvent(QWheelEvent *event)

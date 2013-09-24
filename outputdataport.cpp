@@ -27,3 +27,8 @@ DataValue OutputDataPort::pullRequest()
 {
     return value_;
 }
+
+InputDataPort *OutputDataPort::getInputPort()
+{
+    return inputPort_;
+}

@@ -22,6 +22,8 @@ public:
     void setValue(DataValue val);
 
     DataValue pullRequest();
+
+    InputDataPort *getInputPort();
 };
 
 #endif // OUTPUTDATAPORT_H
