@@ -38,7 +38,10 @@ void InterfaceCoreView::keyPressEvent(QKeyEvent *e)
     // check for program step
     if (e->key() == Qt::Key_Space)
     {
-        app_->processTick();
+        if (app_->isProcessing())
+            app_->stopProcessing();
+        else
+            app_->startProcessing();
         return;
     }
 
@@ -153,11 +156,19 @@ void InterfaceCoreView::drawConnections()
 
             glBegin(GL_QUADS);
 
+            // front face
             glColor3f(   1.0,  0.0, 0.0 );
             glVertex3f(  0, -0.05, 0 );
             glVertex3f(  0,  0.05, 0 );
             glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() + 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
             glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() - 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
+
+            // back face
+            glColor3f(   1.0,  0.0, 0.0 );
+            glVertex3f(  0, -0.05, 0 );
+            glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() - 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
+            glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() + 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
+            glVertex3f(  0, 0.05, 0 );
 
             glEnd();
         }
