@@ -18,6 +18,7 @@ public:
 
     void setParentNode(ProcessNode *node) { parentNode_ = node; }
     ProcessNode *getParentNode() { return parentNode_; }
+    int getID();
 
     static void connect( OutputDataPort *oport, InputDataPort *iport );
 

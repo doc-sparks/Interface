@@ -1,12 +1,25 @@
 #include "stdoutnode.h"
 #include "inputdataport.h"
+#include "groupuielement.h"
+
 #include <QDebug>
 
 StdOutNode::StdOutNode(QVector3D vec, QString name, QObject *parent) :
     ProcessNode(vec, name, parent)
 {
-    nodeType_ = "StdOutNode";
+    setNodeType("StdOutNode");
     addInputPort(new InputDataPort(this));
+
+    // add a TextUIElement within a GroupUIElement to show the output
+    groupUI_ = new GroupUIElement();
+    outUI_ = new TextUIElement();
+    headerUI_ = new TextUIElement();
+    headerUI_->setText("Output:");
+
+    uiElement_ = groupUI_;
+    //groupUI_->setVerticalStyle();
+    groupUI_->addElement( headerUI_ );
+    groupUI_->addElement( outUI_ );
 }
 
 void StdOutNode::process()
@@ -17,7 +30,8 @@ void StdOutNode::process()
         // make ready
         setStatus(Ready);
 
-        // and output the value
-        qDebug() << "STDOUT>  " << getInput(0)->getValue().getString();
+        // and output the value to the UI Element
+        outUI_->setText(getInput(0)->getValue().getString());
     }
 }
+

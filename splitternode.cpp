@@ -6,7 +6,7 @@
 SplitterNode::SplitterNode(QVector3D vec, QString name, QObject *parent) :
     ProcessNode(vec, name, parent)
 {
-    nodeType_ = "SplitterNode";
+    setNodeType("SplitterNode");
     addInputPort( new InputDataPort(this) );
 }
 

@@ -5,7 +5,7 @@
 AdditionNode::AdditionNode(QVector3D vec, QString name, QObject *parent) :
     ProcessNode(vec, name, parent)
 {
-    nodeType_ = "AdditionNode";
+    setNodeType("AdditionNode");
 
     // two inputs, one output
     addInputPort(new InputDataPort(this));

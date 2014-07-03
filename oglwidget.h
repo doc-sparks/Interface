@@ -2,6 +2,7 @@
 #define OGLWIDGET_H
 
 #include <QGLWidget>
+#include <QVector3D>
 
 class QTimer;
 class InterfaceCoreView;
@@ -14,6 +15,9 @@ public:
     OGLWidget(InterfaceCoreView *view, QWidget *parent = 0);
     ~OGLWidget();
 
+    // external setting of pos and rot
+    void setPosition(QVector3D pos) { posValue_ = pos; }
+
 protected:
     void initializeGL();
     //void paintGL();  // use paintEvent instead
@@ -24,6 +28,9 @@ protected:
     void wheelEvent(QWheelEvent *event);
     void mouseMoveEvent(QMouseEvent *event);    
     void resizeGL(int width, int height);    
+
+    int getObjectAtScreenPos(int x, int y);
+
 
 private:
 
@@ -37,7 +44,7 @@ private:
     QPointF rotValue_;
 
     // current camera centred position
-    QPointF posValue_;
+    QVector3D posValue_;
 
     // current camera zoom value
     double zoomValue_;

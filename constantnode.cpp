@@ -4,7 +4,7 @@
 ConstantNode::ConstantNode(QVector3D vec, QString name, QObject *parent) :
     ProcessNode(vec, name, parent)
 {
-    nodeType_ = "ConstantNode";
+    setNodeType("ConstantNode");
     val_.setValue(0.0);
 
     addOutputPort( new OutputDataPort(this) );

@@ -5,6 +5,7 @@
 #include <QVector3D>
 #include <GL/glu.h>
 #include <outputdataport.h>
+#include "uielement.h"
 
 class InterfaceCoreView;
 class InputDataPort;
@@ -26,10 +27,13 @@ private:
     // parent view
     InterfaceCoreView *parentView_;
 
+    // defines the node type
+    QString nodeType_;
+
 protected:
 
-    // node type - defined for each in constructor
-    QString nodeType_;
+    // set the node type
+    void setNodeType(QString t);
 
     // node 3d position
     QVector3D pos_;
@@ -46,6 +50,16 @@ protected:
     // name of this node
     QString name_;
 
+    // UI Element if required
+    UIElement *uiElement_;
+
+    // Info UI Element that shows stuff about the node
+    UIElement *uiElementInfo_;
+
+    // helper function for drawing a cube
+    void drawCube( double sx, double sy, double sz, QVector3D pos );
+    double getNodeWorldSize();
+
 public:
     explicit ProcessNode(QVector3D vec, QString name, QObject *parent = 0);
 
@@ -55,6 +69,10 @@ public:
     // return the display list
     GLuint getDisplayList(InterfaceCoreView *view);
 
+    // UI related
+    UIElement *getUIElement() { return uiElement_; }
+    UIElement *getInfoUIElement() { return uiElementInfo_; }
+
     // return the node type
     QString getNodeType();
 
@@ -63,6 +81,9 @@ public:
     void addInputPort( InputDataPort *d ) { inputPorts_.append(d); }
     void clearInputPorts();
     void clearOutputPorts();
+    QVector3D getOutputPortPosition(int i, bool cube_pos = false);
+    QVector3D getInputPortPosition(int i, bool cube_pos = false);
+    int getPortID( DataPort *p );
 
     // get/set functions
     QVector3D getPos() { return pos_; }

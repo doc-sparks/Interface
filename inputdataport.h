@@ -15,7 +15,7 @@ public:
     InputDataPort(ProcessNode *node);
 
     void connect(OutputDataPort *out);
-    DataValue getValue();
+    DataValue getValue();    
     void pushRequest();
     OutputDataPort *getOutputPort();
 };

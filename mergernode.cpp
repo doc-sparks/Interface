@@ -6,7 +6,7 @@
 MergerNode::MergerNode(QVector3D vec, QString name, QObject *parent) :
     ProcessNode(vec, name, parent)
 {
-    nodeType_ = "MergerNode";
+    setNodeType("MergerNode");
     addOutputPort( new OutputDataPort(this) );
     mode_ = LastPush;
     activePort_ = NULL;

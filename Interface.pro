@@ -24,7 +24,10 @@ SOURCES += main.cpp\
     datavalue.cpp \
     mergernode.cpp \
     additionnode.cpp \
-    splitternode.cpp
+    splitternode.cpp \
+    uielement.cpp \
+    groupuielement.cpp \
+    textuielement.cpp
 
 HEADERS  += \
     oglwidget.h \
@@ -39,6 +42,9 @@ HEADERS  += \
     datavalue.h \
     mergernode.h \
     additionnode.h \
-    splitternode.h
+    splitternode.h \
+    uielement.h \
+    groupuielement.h \
+    textuielement.h
 
 FORMS    +=

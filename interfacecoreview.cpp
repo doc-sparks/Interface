@@ -1,5 +1,4 @@
 #include "interfacecoreview.h"
-#include "oglwidget.h"
 #include "QKeyEvent"
 #include "additionnode.h"
 #include "constantnode.h"
@@ -11,7 +10,10 @@
 
 InterfaceCoreView::InterfaceCoreView(InterfaceCoreApp *app, QWidget *parent) :
     QMainWindow(parent),
-    app_(app)
+    app_(app),
+    highlightedObject_(-1),
+    selectedObject_(-1),
+    oglWidget_(NULL)
 {
     // Show the interface fullscreen
     showFullScreen();
@@ -19,11 +21,45 @@ InterfaceCoreView::InterfaceCoreView(InterfaceCoreApp *app, QWidget *parent) :
     // create and add the openGL Widget
     OGLWidget *w = new OGLWidget(this);
     setCentralWidget(w);
+    oglWidget_ = w;
 }
 
 InterfaceCoreView::~InterfaceCoreView()
 {
 
+}
+
+void InterfaceCoreView::mousePressEvent(QMouseEvent *event)
+{
+    // check for left mouse click
+    if (event->buttons() != Qt::LeftButton)
+    {
+        return;
+    }
+
+    // select a node
+    if (highlightedObject_ != -1)
+    {
+        selectedObject_ = highlightedObject_;
+    }
+    else
+    {
+        selectedObject_ = -1;
+    }
+}
+
+void InterfaceCoreView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    // check for double click on nodes
+    if (highlightedObject_ != -1)
+    {
+        // focus view on node
+        QVector3D new_pos;
+        new_pos.setX( -app_->getProcessNode(highlightedObject_)->getPos().x() );
+        new_pos.setY( app_->getProcessNode(highlightedObject_)->getPos().z() );
+        new_pos.setZ( -app_->getProcessNode(highlightedObject_)->getPos().y() );
+        oglWidget_->setPosition( new_pos );
+    }
 }
 
 void InterfaceCoreView::keyPressEvent(QKeyEvent *e)
@@ -103,18 +139,30 @@ void InterfaceCoreView::createDisplayLists()
 
 void InterfaceCoreView::drawNodes()
 {
-    // go through the node types and create the display lists
+    // go through the node types and draw the node
     for (int i = 0; i < app_->getProcessNodeCount(); i++ )
     {
         // store the camera-relative world position
         glPushMatrix();
 
-        // shift to node position
         ProcessNode *n = app_->getProcessNode(i);
+
+        // shift to node position
         glTranslatef( n->getPos().x(), n->getPos().y(), n->getPos().z() );
 
+        // push the object id
+        glLoadName( i );
+
         // set the colour depending on status
-        if (n->getStatus() == NotReady)
+        if (selectedObject_ == i)
+        {
+            GLfloat yellow[] = {0.8f, .8f, .2f, 1.f};
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, yellow);
+        } else if (highlightedObject_ == i)
+        {
+            GLfloat blue[] = {0.2f, .2f, .8f, 1.f};
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, blue);
+        } else if (n->getStatus() == NotReady)
         {
             GLfloat red[] = {0.8f, .2f, .2f, 1.f};
             glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, red);
@@ -124,8 +172,9 @@ void InterfaceCoreView::drawNodes()
             glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, green);
         }
 
-        // draw the node
-        glCallList(n->getDisplayList(this));
+        // draw the node - remove display lists at present as some nodes are dynamic
+        //glCallList(n->getDisplayList(this));
+        n->draw();
 
         // restore the world position after object draw
         glPopMatrix();
@@ -153,28 +202,55 @@ void InterfaceCoreView::drawConnections()
 
             // yes - so draw the connection
             ProcessNode *m = n->getOutput(j)->getInputPort()->getParentNode();
+            int k = n->getOutput(j)->getInputPort()->getID();
+            QVector3D in_pos = m->getPos() + m->getInputPortPosition(k);
+            QVector3D out_pos = n->getPos() + n->getOutputPortPosition(j);
 
-            glBegin(GL_QUADS);
 
-            // front face
-            glColor3f(   1.0,  0.0, 0.0 );
-            glVertex3f(  0, -0.05, 0 );
-            glVertex3f(  0,  0.05, 0 );
-            glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() + 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
-            glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() - 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
+            GLfloat red[] = {1.0f, .0f, 0.f, 1.f};
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, red);
+            glLineWidth(2.5);
+            glBegin(GL_LINES);
 
-            // back face
-            glColor3f(   1.0,  0.0, 0.0 );
-            glVertex3f(  0, -0.05, 0 );
-            glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() - 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
-            glVertex3f( m->getPos().x() - n->getPos().x(), m->getPos().y() + 0.05 - n->getPos().y(), m->getPos().z() - n->getPos().z() );
-            glVertex3f(  0, 0.05, 0 );
+            glVertex3f( n->getOutputPortPosition(j).x(), n->getOutputPortPosition(j).y(), n->getOutputPortPosition(j).z() );
+            glVertex3f( in_pos.x() - n->getPos().x(), in_pos.y() - n->getPos().y(), in_pos.z() - n->getPos().z() );
+
 
             glEnd();
         }
 
         // restore the world position after object draw
         glPopMatrix();
+    }
+}
+
+void InterfaceCoreView::drawNodeUIElements(QPainter *p)
+{
+    // go through the node types and draw any UI Elements
+    for (int i = 0; i < app_->getProcessNodeCount(); i++ )
+    {
+        // check if a node has a UI Element and draw it
+        //  - The UI element (controlled by the view) knows where it is and how to draw itself
+        ProcessNode *n = app_->getProcessNode(i);
+        if (n->getUIElement())
+        {
+            n->getUIElement()->paint(p);
+        }
+    }
+
+    // draw info UI elements
+    if (selectedObject_ != -1)
+    {
+        app_->getProcessNode(selectedObject_)->getInfoUIElement()->paint(p);
+    }
+}
+
+void InterfaceCoreView::drawFixedUIElements(QPainter *p)
+{
+    // go through the fixed UI Eleemnts and draw them
+    for (int i = 0; i < fixedUIElements_.count(); i++ )
+    {
+        fixedUIElements_.at(i)->paint(p);
     }
 }
 
